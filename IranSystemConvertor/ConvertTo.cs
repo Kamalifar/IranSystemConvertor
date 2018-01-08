@@ -171,15 +171,11 @@ namespace IranSystemConvertor
                 return string.Empty;
             }
 
-            // در صورتی که رشته تماماً عدد نباشد
-            if (!IsNumber(iranSystemEncodedString))
-            {
-                /// تغییر ترتیب کاراکترها از آخر به اول 
-                iranSystemEncodedString = Reverse(iranSystemEncodedString);
+           
+            /// تغییر ترتیب کاراکترها از آخر به اول 
+            iranSystemEncodedString = Reverse(iranSystemEncodedString);
 
-                /// خارج کردن اعداد درون رشته
-                iranSystemEncodedString = ExcludeNumbers(iranSystemEncodedString);
-            }
+               
 
             // وهله سازی از انکودینگ صحیح برای تبدیل رشته ایران سیستم به بایت
             Encoding encoding = Encoding.GetEncoding((int)textEncoding);            
@@ -234,6 +230,13 @@ namespace IranSystemConvertor
             byte[] unicodeContent = Encoding.Convert(encoding, Encoding.Unicode, newStringBytes);
 
             string convertedString = Encoding.Unicode.GetString(unicodeContent).Trim();
+            //برای کارکرد صحیح در جایگزین کردن همزه
+            convertedString = convertedString.Replace("ڑ", "ء").Replace("ؤ", "ئ");
+            //کد زیر فقط برای فیلدهای عددی و رشته های حاوی عدد اجرا می گردد 
+             if (!IsContainNumber(convertedString ))
+            {               
+                convertedString = ExcludeNumbers(convertedString );
+            }
 
             return IncludeNumbers(convertedString);
         }
@@ -241,13 +244,13 @@ namespace IranSystemConvertor
         #region Private Methods (4)
 
         /// <summary>
-        /// رشته ارسال شده تنها حاوی اعداد است یا نه
+        /// بررسی اینکه فیلد عددی یا رشته حاوی عدد باشد
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        static bool IsNumber(string str)
+        static bool IsContainNumber(string str)
         {
-            return Regex.IsMatch(str, @"^[\d]+$");
+            return Regex.Match(str, @"\d+").Success;
         }
 
         /// <summary>
